@@ -1,13 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, Any
 from services.bot_service import create_dca_bot
 
-app = FastAPI(
-    title="3Commas Bot API",
-    description="API for managing 3Commas trading bots",
-    version="1.0.0"
-)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,7 +23,7 @@ async def create_bot(
     max_safety_orders: int = 3,
     active_safety_orders_count: int = 1,
     strategy: str = "manual"
-) -> Dict[str, Any]:
+):
     result = create_dca_bot(
         account_id=account_id,
         pair=pair,
