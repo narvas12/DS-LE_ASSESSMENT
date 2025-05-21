@@ -17,38 +17,29 @@ def make_api_request(
     }
 
     try:
-        response = requests.request(
-            method,
-            url,
-            json=payload,
-            headers=headers,
-            timeout=10
-        )
-        response.raise_for_status()
+    response = requests.request(
+        method,
+        url,
+        json=payload,
+        headers=headers,
+        timeout=10
+    )
 
-        # Try to decode JSON safely
-        try:
-            return response.json()
-        except requests.exceptions.JSONDecodeError:
-            return {
-                "message": "API responded with non-JSON",
-                "error": "Non-JSON response",
-                "details": response.text
-            }
+    print("Status Code:", response.status_code)
+    print("Response Headers:", response.headers)
+    print("Response Text:", response.text)  # Add this for debugging
 
-    except requests.exceptions.RequestException as e:
-        error_details = None
-        if hasattr(e, "response") and e.response is not None:
-            try:
-                error_details = e.response.json()
-            except requests.exceptions.JSONDecodeError:
-                error_details = e.response.text
+    response.raise_for_status()
 
+    try:
+        return response.json()
+    except requests.exceptions.JSONDecodeError:
         return {
-            "message": "Failed to create bot",
-            "error": str(e),
-            "details": error_details
+            "message": "API responded with non-JSON",
+            "error": "Non-JSON response",
+            "details": response.text
         }
+
 
 
 def change_mode(mode: str = "paper") -> Dict[str, Any]:
