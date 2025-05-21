@@ -25,7 +25,17 @@ def make_api_request(
             timeout=10
         )
         response.raise_for_status()
-        return response.json()
+
+        # Try to decode JSON safely
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            return {
+                "message": "API responded with non-JSON",
+                "error": "Non-JSON response",
+                "details": response.text
+            }
+
     except requests.exceptions.RequestException as e:
         error_details = None
         if hasattr(e, "response") and e.response is not None:
@@ -39,6 +49,7 @@ def make_api_request(
             "error": str(e),
             "details": error_details
         }
+
 
 def change_mode(mode: str = "paper") -> Dict[str, Any]:
     endpoint = f"/ver1/users/change_mode?mode={mode}"
