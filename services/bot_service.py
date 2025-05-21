@@ -17,28 +17,28 @@ def make_api_request(
     }
 
     try:
-    response = requests.request(
-        method,
-        url,
-        json=payload,
-        headers=headers,
-        timeout=10
-    )
+        response = requests.request(
+            method,
+            url,
+            json=payload,
+            headers=headers,
+            timeout=10
+        )
 
-    print("Status Code:", response.status_code)
-    print("Response Headers:", response.headers)
-    print("Response Text:", response.text)  # Add this for debugging
+        print("Status Code:", response.status_code)
+        print("Response Headers:", response.headers)
+        print("Response Text:", response.text)  # Add this for debugging
 
-    response.raise_for_status()
+        response.raise_for_status()
 
-    try:
-        return response.json()
-    except requests.exceptions.JSONDecodeError:
-        return {
-            "message": "API responded with non-JSON",
-            "error": "Non-JSON response",
-            "details": response.text
-        }
+        try:
+            return response.json()
+        except requests.exceptions.JSONDecodeError:
+            return {
+                "message": "API responded with non-JSON",
+                "error": "Non-JSON response",
+                "details": response.text
+            }
 
 
 
