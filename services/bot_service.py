@@ -41,6 +41,20 @@ def make_api_request(
             }
 
 
+    except requests.exceptions.RequestException as e:
+        error_details = None
+        if hasattr(e, "response") and e.response is not None:
+            try:
+                error_details = e.response.json()
+            except requests.exceptions.JSONDecodeError:
+                error_details = e.response.text
+
+        return {
+            "message": "Failed to create bot",
+            "error": str(e),
+            "details": error_details
+        }
+
 
 def change_mode(mode: str = "paper") -> Dict[str, Any]:
     endpoint = f"/ver1/users/change_mode?mode={mode}"
