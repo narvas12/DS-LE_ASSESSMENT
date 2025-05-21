@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from services.bot_service import create_dca_bot
+from utils.schemas import BotCreateRequest
 
 app = FastAPI()
 
@@ -13,29 +14,19 @@ app.add_middleware(
 )
 
 @app.post("/create-bot")
-async def create_bot(
-    account_id: int,
-    pair: str,
-    name: str = "My DCA Bot",
-    base_order_volume: float = 10,
-    safety_order_volume: float = 20,
-    take_profit: float = 2,
-    max_safety_orders: int = 3,
-    active_safety_orders_count: int = 1,
-    strategy: str = "manual"
-):
+async def create_bot(req: BotCreateRequest):
     result = create_dca_bot(
-        account_id=account_id,
-        pair=pair,
-        name=name,
-        base_order_volume=base_order_volume,
-        safety_order_volume=safety_order_volume,
-        take_profit=take_profit,
-        max_safety_orders=max_safety_orders,
-        active_safety_orders_count=active_safety_orders_count,
-        strategy=strategy
+        account_id=req.account_id,
+        pair=req.pair,
+        name=req.name,
+        base_order_volume=req.base_order_volume,
+        safety_order_volume=req.safety_order_volume,
+        take_profit=req.take_profit,
+        max_safety_orders=req.max_safety_orders,
+        active_safety_orders_count=req.active_safety_orders_count,
+        strategy=req.strategy
     )
-    
+
     if "error" in result:
         raise HTTPException(
             status_code=500,

@@ -76,14 +76,14 @@ def create_dca_bot(
     payload = {
         "account_id": account_id,
         "name": name,
-        "pairs": [pair], 
-        "base_order_volume": base_order_volume,
-        "base_order_volume_type": "quote_currency",
-        "take_profit": take_profit,
-        "take_profit_type": "total",
+        "pairs": [pair],
         "strategy_list": [{"strategy": strategy}],
+        "base_order_volume": str(base_order_volume),
+        "base_order_volume_type": "quote_currency",
+        "take_profit": str(take_profit),
+        "take_profit_type": "total",
         "safety_order_step_percentage": 1.5,
-        "safety_order_volume": safety_order_volume,
+        "safety_order_volume": str(safety_order_volume),
         "safety_order_volume_type": "quote_currency",
         "max_safety_orders": max_safety_orders,
         "active_safety_orders_count": active_safety_orders_count,
@@ -96,5 +96,6 @@ def create_dca_bot(
         "start_order_type": "limit",
         "leverage_type": "not_specified"
     }
+
 
     return make_api_request("POST", endpoint, payload)
