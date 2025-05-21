@@ -3,16 +3,28 @@ from typing import Dict, Any, Optional
 from utils.config import API_KEY, BASE_URL
 from utils.signer import create_signature_hmac
 
+
+def change_mode(mode: str = "paper") -> Dict[str, Any]:
+    endpoint = f"/ver1/users/change_mode?mode={mode}"
+    return make_api_request("POST", endpoint)
+
+
 def make_api_request(
     method: str,
     endpoint: str,
     payload: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    url = f"{BASE_URL}{endpoint}"
+    """
+    Make authenticated API request to 3Commas
+    """
+
+    if not endpoint.startswith('/public/api'):
+        endpoint = f"/public/api{endpoint}"
+    url = f"{BASE_URL.rstrip('/')}{endpoint}"
 
     headers = {
         "APIKEY": API_KEY,
-        "Signature": create_signature_hmac(method, endpoint, payload),
+        "Signature": create_signature_hmac(endpoint, payload),
         "Content-Type": "application/json"
     }
 
@@ -22,27 +34,23 @@ def make_api_request(
             url,
             json=payload,
             headers=headers,
-            timeout=10
+            timeout=30
         )
-        response.raise_for_status()
+        
+        if not response.text:
+            return {
+                "error": "Empty response from API",
+                "status_code": response.status_code
+            }
+            
         return response.json()
+        
     except requests.exceptions.RequestException as e:
-        error_details = None
-        if hasattr(e, "response") and e.response is not None:
-            try:
-                error_details = e.response.json()
-            except requests.exceptions.JSONDecodeError:
-                error_details = e.response.text
-
+        error_details = e.response.text if hasattr(e, "response") else str(e)
         return {
-            "message": "Failed to create bot",
-            "error": str(e),
+            "error": "API request failed",
             "details": error_details
         }
-
-def change_mode(mode: str = "paper") -> Dict[str, Any]:
-    endpoint = f"/ver1/users/change_mode?mode={mode}"
-    return make_api_request("POST", endpoint)
 
 def create_dca_bot(
     account_id: int,
@@ -55,12 +63,15 @@ def create_dca_bot(
     active_safety_orders_count: int = 1,
     strategy: str = "manual"
 ) -> Dict[str, Any]:
+    """
+    Create a new DCA bot on 3Commas
+    """
     endpoint = "/ver1/bots/create_bot"
-
+    
     payload = {
         "account_id": account_id,
         "name": name,
-        "pairs": [pair], 
+        "pairs": [pair],
         "base_order_volume": base_order_volume,
         "base_order_volume_type": "quote_currency",
         "take_profit": take_profit,
